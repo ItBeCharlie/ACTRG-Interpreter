@@ -24,10 +24,16 @@ def main():
     # given_productions = [('n', 'p')]
 
     # Read in grammar list and evaluate the grammar
-    parse_grammar(grammar, given_productions)
+    valid_grammar = parse_grammar(grammar, given_productions)
 
-    # Using global variable from parse_grammar draw the underlinks to visualize pairs.
-    draw_underlinks(input_str)
+    # Check if successful parse
+    if valid_grammar:
+        print("Accept")
+        # Using global variable from parse_grammar draw the underlinks to visualize pairs.
+        draw_underlinks(input_str)
+    else:
+        print("Reject")
+
 
 # Choose What SymbolSet to use
 
@@ -66,7 +72,7 @@ def parse_grammar(grammar, given_productions):
     index_stack = []
     for index, token in enumerate(grammar):
         if debug:
-            print(f'Current Token: {str(token)}')
+            print(f'Token: {str(token)}')
             print(f'Stack: {str(stack)}\n')
         # If the stack has equal/higher precedence push the token.
         if len(stack) == 0 or stack[-1][1] >= token[1]:
@@ -101,12 +107,8 @@ def parse_grammar(grammar, given_productions):
                     stack.append(token)
                     index_stack.append(index)
 
-    # Check if successful parse
-    if len(stack) == 0:
-        print("Accept")
-        # print(underlink_pairs)
-    else:
-        print("Reject")
+    # If stack is empty, successful parse
+    return len(stack) == 0
 
 
 """
