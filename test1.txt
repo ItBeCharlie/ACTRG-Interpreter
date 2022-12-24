@@ -1,0 +1,2 @@
+n c_l c p_r s o_l ph ph_r o c_l c s_r
+n > p

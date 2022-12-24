@@ -1,0 +1,5 @@
+v pi_r s o_l p s_r pl pl_r sl pi_l p_ll o_l s pl_l p_l p pl s_r p p_l v sl_r
+v > pi
+v > o
+p > pi
+p > o
