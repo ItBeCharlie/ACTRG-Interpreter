@@ -56,6 +56,22 @@ Contributors names and contact info
 Charlie DeGennaro
 Andrew McDonald
 
+## Other Notes
+
+Precedence is the main system used to know when to push or pop items
+from the stack. To achieve this, we converted each superscript "r" to 1,
+and each "l" to -1. To get the precedence, we then add up all these values
+to get a numerical representation of precedence. Smaller values are always
+less precedence, for example:
+
+```
+pi pi_r
+
+converts to
+
+('pi', 0) ('pi', 1)
+```
+
 ## Example Output
 
 Without debug
