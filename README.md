@@ -31,22 +31,23 @@ py interpreter.py \[textfile] (debug)
 -   (Note anything in parenthesis should NOT be added)
 
 ```
-(Specify the sentence you want to check on THE FIRST LINE)
-(Every token in the sentence should be seperated by spaces)
-(To specify superscripts, write an "_" followed by the number of l's or r's in your superscript)
-v pi_r s o_l v s_r
-
 (To specify given productions, write them in the following format)
 v > pi
 v > o
+(To specify the dictionary for the given language: )
+John : v
+Marie : v
+adores : pi_r s o_l
 ```
 
 Example of what the file looks like without the comments above:
 
 ```
-v pi_r s o_l v s_r
 v > pi
 v > o
+John : v
+Marie : v
+adores : pi_r s o_l
 ```
 
 ## Authors
@@ -115,3 +116,4 @@ v   pi_r   s   o_l   v   s_r
 ## Version History
 
 1.0 Initial Functionality
+1.1 Added ability to define dictionary

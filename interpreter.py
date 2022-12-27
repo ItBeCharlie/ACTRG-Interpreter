@@ -5,34 +5,64 @@ import sys
 def main():
     global debug
     # Parse input file from args
-    input_str, given_productions = parse_file(sys.argv[1])
+    dictionary, given_productions = parse_file(sys.argv[1])
     if len(sys.argv) > 2 and sys.argv[2] == "debug":
         debug = True
     else:
         debug = False
 
-    # print(input_str)
+    input_str = input('Please enter your sentence: ')
 
-    # print(given_productions)
-
-    # Converts token list into tuple list
-    grammar = parse_sentence(input_str)
+    # Converts input sentence proper grammar
+    grammar = generate_sentence(
+        input_str, dictionary).split()
     # print(grammar)
 
-    # List of identity/given contractions
-    # given_productions = [('v', 'p'), ('v', 'o')]
-    # given_productions = [('n', 'p')]
+    sentence = parse_sentence(grammar)
+
+    # print(sentence)
 
     # Read in grammar list and evaluate the grammar
-    valid_grammar = parse_grammar(grammar, given_productions)
+    valid_grammar = parse_grammar(
+        sentence, given_productions, balance_tokens=['s', 'sh'])
 
     # Check if successful parse
     if valid_grammar:
         print("Accept")
-        # Using global variable from parse_grammar draw the underlinks to visualize pairs.
-        draw_underlinks(input_str)
     else:
         print("Reject")
+
+
+def parse_file(file):
+    dictionary = {}
+    given_productions = []
+    with open(file) as f:
+        lines = f.readlines()
+
+    for line in lines:
+        split_line = line.removesuffix('\n').split()
+        if split_line[1] == '>':
+            given_productions.append((split_line[0], split_line[2]))
+        elif split_line[1] == ':':
+            dictionary[split_line[0]] = ' '.join(split_line[2:])
+
+    # print(dictionary)
+    # print(given_productions)
+    return dictionary, given_productions
+
+
+def generate_sentence(sentence, dictionary):
+    split_sentence = sentence.split()
+    grammar = ''
+
+    # Generates the grammar form using the dictionary
+    for word in split_sentence:
+        if word not in dictionary:
+            print(f'Error: {word} is not in the provided dictionary')
+            exit(1)
+        grammar += f'{dictionary[word]} '
+
+    return grammar
 
 
 # Choose What SymbolSet to use
@@ -52,7 +82,7 @@ class SymbolSet(Enum):
 #     HORINZONTAL = '═'
 
 
-def parse_file(input):
+def old_parse_file(input):
     with open(input) as f:
         lines = f.readlines()
     sentence = lines[0].split()
@@ -64,13 +94,13 @@ def parse_file(input):
     return sentence, given_productions
 
 
-def parse_grammar(grammar, given_productions):
+def parse_grammar(tuple_sentence, given_productions, balance_tokens):
     global underlink_pairs
     global debug
     underlink_pairs = []
     stack = []
     index_stack = []
-    for index, token in enumerate(grammar):
+    for index, token in enumerate(tuple_sentence):
         if debug:
             print(f'Token: {str(token)}')
             print(f'Stack: {str(stack)}\n')
@@ -107,7 +137,18 @@ def parse_grammar(grammar, given_productions):
                     stack.append(token)
                     index_stack.append(index)
 
-    # If stack is empty, successful parse
+    # At the end of the grammar evaluation if the stack still has a token
+    # and that token is a one that can be balanced we proceed.
+    if len(stack) == 1:
+        if stack[-1][0] in balance_tokens:
+            print(f'Token: (\'{stack[-1][0]}\', 1)')
+            print(f'Stack: {str(stack)}\n')
+            underlink_pairs.append((index_stack.pop(), len(tuple_sentence)))
+            tuple_sentence.append((stack[-1][0], 1))
+            draw_underlinks(tuple_sentence)
+            return True
+        return False
+
     return len(stack) == 0
 
 
@@ -118,11 +159,18 @@ v   p_r   s   o_l   v   s_r
 """
 
 
-def draw_underlinks(sentence, gap=3):
-    middle_indexes = get_middle_str_indexes(sentence, gap)
-    for token in sentence:
-        print(token, end=' '*gap)
-    print()
+def draw_underlinks(tuple_sentence, gap=3):
+    formatted_sentence = []
+    for tuple in tuple_sentence:
+        if tuple[1] < 0:
+            formatted_sentence.append(f'{tuple[0]}_{"l"*-tuple[1]}')
+        elif tuple[1] > 0:
+            formatted_sentence.append(f'{tuple[0]}_{"r"*tuple[1]}')
+        else:
+            formatted_sentence.append(f'{tuple[0]}')
+
+    middle_indexes = get_middle_str_indexes(formatted_sentence, gap)
+    print((' '*gap).join(formatted_sentence))
 
     cur_depth = 1
     max_depth = 1

@@ -1,3 +1,5 @@
-v pi_r s o_l v s_r
 v > pi
 v > o
+Marie : v
+John : v
+adores : pi_r s o_l
