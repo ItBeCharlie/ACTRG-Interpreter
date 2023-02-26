@@ -1,1 +1,2 @@
-ref30.pdf
+*.pdf
+/__pycache__
