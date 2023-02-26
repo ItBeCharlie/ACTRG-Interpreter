@@ -11,6 +11,8 @@ def main():
     else:
         debug = False
 
+    print(debug)
+
     input_str = input('Please enter your sentence: ')
 
     # Converts input sentence proper grammar
@@ -23,11 +25,12 @@ def main():
     # print(sentence)
 
     # Read in grammar list and evaluate the grammar
-    valid_grammar = parse_grammar(
+    valid_grammar, tuple_sentence = parse_grammar(
         sentence, given_productions, balance_tokens=['s', 'sh'])
 
     # Check if successful parse
     if valid_grammar:
+        draw_underlinks(tuple_sentence)
         print("Accept")
     else:
         print("Reject")
@@ -100,12 +103,16 @@ def parse_grammar(tuple_sentence, given_productions, balance_tokens):
     underlink_pairs = []
     stack = []
     index_stack = []
-    for index, token in enumerate(tuple_sentence):
+    tuple_sentence.append(('s', 1))
+    print(tuple_sentence)
+    # for index, token in enumerate(tuple_sentence):
+    for index in range(len(tuple_sentence)-1, -1, -1):
+        token = tuple_sentence[index]
         if debug:
             print(f'Token: {str(token)}')
             print(f'Stack: {str(stack)}\n')
         # If the stack has equal/higher precedence push the token.
-        if len(stack) == 0 or stack[-1][1] >= token[1]:
+        if len(stack) == 0 or stack[-1][1] <= token[1]:
             stack.append(token)
             index_stack.append(index)
 
@@ -145,11 +152,12 @@ def parse_grammar(tuple_sentence, given_productions, balance_tokens):
             print(f'Stack: {str(stack)}\n')
             underlink_pairs.append((index_stack.pop(), len(tuple_sentence)))
             tuple_sentence.append((stack[-1][0], 1))
-            draw_underlinks(tuple_sentence)
-            return True
-        return False
+            # draw_underlinks(tuple_sentence)
+            # print('hello')
+            return True, tuple_sentence
+        return False, None
 
-    return len(stack) == 0
+    return len(stack) == 0, tuple_sentence
 
 
 """
