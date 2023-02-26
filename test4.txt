@@ -1,0 +1,11 @@
+v > pi
+v > o
+p > pi
+p > o
+Marie : v
+John : v
+likes : pi_r s o_l pihat
+a : pihat_r o c_l
+book : c
+which : c_r c ohat shat_l
+detests : pi_r s o_l pihat
