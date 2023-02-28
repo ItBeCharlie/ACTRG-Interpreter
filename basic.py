@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Basic:
+class Basic(Enum):
     PI = 0  # subject
     PI1 = 1  # first person singular subject
     PI2 = 2  # second person singular and any plural personal subject
