@@ -1,6 +1,7 @@
 from basic import Basic as B
 from transitions import transitions as trans
 from dictionary import dictionary as global_dictionary
+from enum import Enum
 
 
 def main():
@@ -10,7 +11,8 @@ def main():
     valid, pairs = reduce_check(basic_list)
     print(valid)
     if valid:
-        print(pairs)
+        print(sentence)
+        draw_underlinks(basic_list, pairs)
 
 
 def display_enums(sentence):
@@ -52,7 +54,7 @@ def reduce_check(sentence):
     # Sentences cannot have an odd number of basic types
     if len(sentence) % 2 == 1:
         return False, []
-    valid, pairs = reduce_check_helper(sentence, 0, len(sentence)-1)
+    valid, pairs, depth = reduce_check_helper(sentence, 0, len(sentence)-1)
     return valid, pairs
 
 
@@ -73,22 +75,101 @@ def reduce_check_helper(sentence, start, end, pairs=[]):
     # print(f'S: {start}, E: {end}')
     # Base case: Empty sentence is valid
     if end-start <= 0:
-        return True, pairs
+        return True, pairs, 0
     # Work our way backwards through the sentence, checking every
     # other basic_tuple, and seeing if we have a valid pair
     for index in range(end-1, start-1, -2):
         # Check if the given pair is a valid match
         # print(index, end)
         if match(sentence[index], sentence[end]):
-            # Add our new paid
-            pairs.append((index, end))
+            # Recursive call for outer
+            valid_outer, pairs, depth_outer = reduce_check_helper(
+                sentence, start, index-1, pairs)
+            # Recursive call for inner
+            valid_inner, pairs, depth_inner = reduce_check_helper(
+                sentence, index+1, end-1, pairs)
+            # Calculate depth of current tuple
+            depth = depth_inner + 1
+            # Add our new pair
+            pairs.append((index, end, depth))
             # print(pairs)
             # Recursive call for outer and inner structure
-            valid, pairs = reduce_check_helper(sentence, start, index-1, pairs) \
-                and reduce_check_helper(sentence, index+1, end-1, pairs)
-            return valid, pairs
+            return valid_outer and valid_inner, pairs, depth
     # If we check every term and do not find a match, the sentence is invalid
     return False, []
+
+
+# class SymbolSet(Enum):
+#     VERTICAL = '│'
+#     LEFTCORNER = '└'
+#     RIGHTCORNER = '┘'
+#     HORINZONTAL = '─'
+
+
+class SymbolSet(Enum):
+    VERTICAL = '║'
+    LEFTCORNER = '╚'
+    RIGHTCORNER = '╝'
+    HORINZONTAL = '═'
+
+
+def draw_underlinks(tuple_sentence, pairs, gap=3):
+    formatted_sentence = []
+    for tuple in tuple_sentence:
+        if tuple[1] < 0:
+            formatted_sentence.append(f'{tuple[0].name}_{"l"*-tuple[1]}')
+        elif tuple[1] > 0:
+            formatted_sentence.append(f'{tuple[0].name}_{"r"*tuple[1]}')
+        else:
+            formatted_sentence.append(f'{tuple[0].name}')
+
+    middle_indexes = get_middle_str_indexes(formatted_sentence, gap)
+    print((' '*gap).join(formatted_sentence))
+
+    cur_depth = 1
+    max_depth = max(list(map(lambda tuple: tuple[2], pairs)))
+
+    while cur_depth <= max_depth:
+        underlink_chars = ['' for _ in range(len(pairs)*2)]
+        for pair in pairs:
+            depth = pair[2]
+            if depth == cur_depth:
+                underlink_chars[pair[0]] = SymbolSet.LEFTCORNER.value
+                underlink_chars[pair[1]] = SymbolSet.RIGHTCORNER.value
+            elif depth > cur_depth:
+                underlink_chars[pair[0]] = SymbolSet.VERTICAL.value
+                underlink_chars[pair[1]] = SymbolSet.VERTICAL.value
+        cur_char_index = 0
+        gap_char = ' '
+        cur_line = ''
+        # This reads underlink_chars and draws the different symbols when
+        # on a index that is in the middle of a token or not.
+        for i in range(max(middle_indexes)+1):
+            if i in middle_indexes:
+                cur_line += underlink_chars[cur_char_index]
+                if underlink_chars[cur_char_index] == SymbolSet.LEFTCORNER.value:
+                    gap_char = SymbolSet.HORINZONTAL.value
+                if underlink_chars[cur_char_index] == SymbolSet.RIGHTCORNER.value:
+                    gap_char = ' '
+                if underlink_chars[cur_char_index] == '':
+                    cur_line += gap_char
+                cur_char_index += 1
+            else:
+                cur_line += gap_char
+        print(cur_line)
+        cur_depth += 1
+
+# returns list with indexes of all the middles of each str
+
+
+def get_middle_str_indexes(sentence, gap=3):
+    total_length = 0
+    out = []
+    for token in sentence:
+        mid = len(token)//2
+        out.append(total_length + mid)
+        total_length += gap + len(token)
+    return out
 
 
 main()
