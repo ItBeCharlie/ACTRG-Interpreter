@@ -89,14 +89,16 @@ def reduce_check_helper(sentence, start, end, pairs=[]):
             valid_inner, pairs, depth_inner = reduce_check_helper(
                 sentence, index+1, end-1, pairs)
             # Calculate depth of current tuple
+            # TODO: Check every inner, as the first call for inner doesn't signify the maximum inside the inner
             depth = depth_inner + 1
+
             # Add our new pair
             pairs.append((index, end, depth))
             # print(pairs)
             # Recursive call for outer and inner structure
             return valid_outer and valid_inner, pairs, depth
     # If we check every term and do not find a match, the sentence is invalid
-    return False, []
+    return False, [], 0
 
 
 # class SymbolSet(Enum):
