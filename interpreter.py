@@ -5,7 +5,8 @@ from enum import Enum
 
 
 def main():
-    sentence = input('Enter a sentence: ')
+    # sentence = input('Enter a sentence: ')
+    sentence = 'john likes a book which marie detests .'
     basic_list = sentence_to_basic_list(sentence)
     display_enums(basic_list)
     valid, pairs = reduce_check(basic_list)
@@ -13,6 +14,18 @@ def main():
     if valid:
         print(sentence)
         draw_underlinks(basic_list, pairs)
+        print(get_raw_pairs(pairs))
+        generate_latex(basic_list, get_raw_pairs(pairs))
+
+
+def get_raw_pairs(pairs):
+    """
+    Removes the depth information from pairs
+    """
+    new_pairs = []
+    for pair in pairs:
+        new_pairs.append((pair[0], pair[1]))
+    return new_pairs
 
 
 def display_enums(sentence):
@@ -115,6 +128,72 @@ class SymbolSet(Enum):
     HORINZONTAL = '═'
 
 
+def generate_latex(tuple_sentence, pairs):
+    latex_symbols = []
+    latex_pairs = []
+    current_line_symbols = []
+    output = ''
+    line = ''
+    for tuple in tuple_sentence:
+        latex_symbols.append(tuple_to_latex(tuple))
+        # line += tuple_to_latex(tuple) + ' \\otimes '
+    print(latex_symbols)
+
+    for pair in pairs:
+        latex_pairs.append((latex_symbols[pair[0]], latex_symbols[pair[1]]))
+
+    for index in range(len(latex_pairs)):
+
+    print(latex_pairs)
+
+
+def tuple_to_latex(tuple):
+    output = ''
+    hat = False
+    bar = False
+    tuple_name = tuple[0].name
+    if 'BAR' in tuple_name:
+        output += '\\bar{'
+        bar = True
+        tuple_name = tuple_name.replace('BAR', '')
+    if 'HAT' in tuple_name:
+        output += '\\hat{'
+        hat = True
+        tuple_name = tuple_name.replace('HAT', '')
+
+    if 'PI' in tuple_name:
+        output += '\\pi'
+        tuple_name = tuple_name.replace('PI', '')
+
+    number = ''
+    if '1' in tuple_name:
+        number += '_1'
+        tuple_name = tuple_name.replace('1', '')
+    if '2' in tuple_name:
+        number += '_2'
+        tuple_name = tuple_name.replace('2', '')
+    if '3' in tuple_name:
+        number += '_3'
+        tuple_name = tuple_name.replace('3', '')
+
+    if tuple_name != '':
+        output += tuple_name.lower()
+
+    output += number
+
+    if hat:
+        output += '}'
+    if bar:
+        output += '}'
+
+    if tuple[1] == 1:
+        output += '^r'
+    elif tuple[1] == -1:
+        output += '^l'
+
+    return output
+
+
 def draw_underlinks(tuple_sentence, pairs, gap=3):
     formatted_sentence = []
     for tuple in tuple_sentence:
@@ -126,6 +205,7 @@ def draw_underlinks(tuple_sentence, pairs, gap=3):
             formatted_sentence.append(f'{tuple[0].name}')
 
     middle_indexes = get_middle_str_indexes(formatted_sentence, gap)
+    # print((' '*(gap+2)).join([str(x) for x in range(len(formatted_sentence))]))
     print((' '*gap).join(formatted_sentence))
 
     cur_depth = 1
