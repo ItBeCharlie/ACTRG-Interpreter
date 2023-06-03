@@ -137,14 +137,60 @@ def generate_latex(tuple_sentence, pairs):
     for tuple in tuple_sentence:
         latex_symbols.append(tuple_to_latex(tuple))
         # line += tuple_to_latex(tuple) + ' \\otimes '
-    print(latex_symbols)
+    # print(latex_symbols)
 
     for pair in pairs:
         latex_pairs.append((latex_symbols[pair[0]], latex_symbols[pair[1]]))
 
     for index in range(len(latex_pairs)):
+        line = ''
+        for pair in latex_pairs:
+            for item in pair:
+                line += item + ' \\otimes '
+        line = line.removesuffix(' \\otimes ')
+        output += line + '\\\\\n'
+        line = ''
+        latex_pairs[index] = ('1',)
+
+        left_ones, right_ones = find_latex_constants(
+            latex_pairs, index)  # Mu's contribution -> kjml, azx
+
+        line = '&\\downarrow{'
+
+        if left_ones == 0:
+            pass
+        elif left_ones == 1:
+            line += '1 \\otimes '
+        else:
+            line += f'1^{"{" + str(left_ones) + "}"} \\otimes '
+
+        line += f'\\epsilon_{index} '
+
+        if right_ones == 0:
+            pass
+        elif right_ones == 1:
+            line += '\\otimes 1'
+        else:
+            line += f'\\otimes 1^{"{" + str(right_ones) + "}"}'
+
+        line += '}'
+
+        output += line + '\\\\\n'
+
+    print(output)
 
     print(latex_pairs)
+
+
+def find_latex_constants(latex_pairs, midpoint):
+    left_ones = 0
+    right_ones = 0
+    for index in range(len(latex_pairs)):
+        if index < midpoint:
+            left_ones += len(latex_pairs[index])
+        if index > midpoint:
+            right_ones += len(latex_pairs[index])
+    return left_ones, right_ones
 
 
 def tuple_to_latex(tuple):
